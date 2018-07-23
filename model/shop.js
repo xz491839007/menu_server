@@ -35,7 +35,7 @@ module.exports = function (sequelize, DataTypes) {
             type:DataTypes.STRING(200)
         },
         shopType:{
-            type:DataTypes.INTEGER
+            type:DataTypes.STRING(5)
         },
         shopTel:{
             type:DataTypes.STRING(15)
