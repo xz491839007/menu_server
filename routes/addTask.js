@@ -27,9 +27,17 @@ router.post('/addtask',function (req,res,next) {
             let type
             let beginTime = new Date(req.body.begin_time)
             let endTime = new Date(req.body.end_time)
+            if (!beginTime || !endTime) {
+                res.json({
+                    status:2,
+                    message:'参数异常'
+                })
+            }
             let nowTime = new Date()
             let duration = nowTime.getTime() - beginTime.getTime()
             let leater = nowTime.getTime() - endTime.getTime()
+            let dur = endTime.getTime() - beginTime.getTime()
+            dur = dur / 1000
             if (duration < 0){
                 // 准备执行 当前时间 小于 开始时间
                 type = 1
@@ -48,9 +56,9 @@ router.post('/addtask',function (req,res,next) {
             Task.create({
                 task_name:req.body.task_name,
                 task_introduce:req.body.task_introduce,
-                begin_time:req.body.begin_time,
-                end_time:req.body.end_time,
-                duration:req.body.duration,
+                begin_time:beginTime,
+                end_time:endTime,
+                duration:dur,
                 is_repeat:req.body.is_repeat,
                 repeat_rate:req.body.repeat_rate,
                 score:req.body.score,
@@ -136,10 +144,18 @@ router.get('/getUserScore',function (req,res,next) {
                 user_id:req.query.userId
             }
         }).then(function (data) {
-            res.json({
-                status:1,
-                message:'查询成功',
-                score:data
+            Task.findAndCountAll({
+                where:{
+                    user_id:req.query.userId
+                }
+            }).then(function (find_data) {
+                res.json({
+                    status:1,
+                    message:'查询成功',
+                    score:data,
+                    count:find_data.count,
+                    data:find_data.rows
+                })
             })
         })
 
@@ -173,8 +189,12 @@ router.get('/querytask',function (req,res,next) {
                 }
             }
         }
-
+        // 按结束时间从近到远->排序
         Task.findAll({
+            order:[
+                ['important','DESC'],
+                ['end_time','ASC']
+            ],
             where: type
         }).then(function (data) {
             res.json({

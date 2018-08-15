@@ -21,7 +21,6 @@ sequelize.authenticate().then(function () {
 }).catch(function (err) {
     //数据库连接失败时打印输出
     console.error(err);
-    sequelize.re
     throw err;
 });
 
